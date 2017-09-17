@@ -1,0 +1,1219 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demo_myCNN</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-05-30"><meta name="DC.source" content="demo_myCNN.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> varargout = demo_myCNN(varargin)
+<span class="comment">% A GUI-demo for myCNN character recogniton example.</span>
+<span class="comment">%</span>
+<span class="comment">% DEMO_MYCNN neede the original MNIST dataset, which can be found on</span>
+<span class="comment">% Yann LeCun's web-site: http://yann.lecun.com/exdb/mnist/index.html</span>
+<span class="comment">% It is more convenient to put MNIST data files (t10k-images-idx3-ubyte,</span>
+<span class="comment">% t10k-labels-idx1-ubyte, train-images-idx3-ubyte and train-labels-idx1-ubyte)</span>
+<span class="comment">% into CNN/MNIST folder, so demo could automatically find them.</span>
+<span class="comment">%</span>
+<span class="comment">% DEMO_MYCNN code is based on CNN_TOOL developed by Mikhail Sitotenko</span>
+<span class="comment">% see http://www.mathworks.com/matlabcentral/fileexchange/24291</span>
+<span class="comment">%</span>
+<span class="comment">% Last update: 2009-09-30</span>
+
+
+mInputArgs      =   varargin;   <span class="comment">% Command line arguments when invoking the GUI</span>
+mOutputArgs     =   {};         <span class="comment">% Variable for storing output when GUI returns</span>
+mIconCData      =   [];         <span class="comment">% The icon CData edited by this GUI of dimension</span>
+                                <span class="comment">% [mIconHeight, mIconWidth, 3]</span>
+mIsEditingIcon  =   false;      <span class="comment">% Flag for indicating whether the current mouse</span>
+                                <span class="comment">% move is used for editing color or not</span>
+<span class="comment">% Variables for supporting custom property/value pairs</span>
+mPropertyDefs   =   {<span class="keyword">...</span><span class="comment">        % The supported custom property/value pairs of this GUI</span>
+                     <span class="string">'iconwidth'</span>,   @localValidateInput, <span class="string">'mIconWidth'</span>;
+                     <span class="string">'iconheight'</span>,  @localValidateInput, <span class="string">'mIconHeight'</span>;
+                     <span class="string">'MNISTfile'</span>,   @localValidateInput, <span class="string">'mMNISTFile'</span>};
+mIconWidth      =   28;         <span class="comment">% Use input property 'iconwidth' to initialize</span>
+mIconHeight     =   28;         <span class="comment">% Use input property 'iconheight' to initialize</span>
+mMNISTFile      =   <span class="string">'./MNIST/t10k-images-idx3-ubyte'</span>; <span class="comment">%fullfile(matlabroot,'./');</span>
+Images = {0};
+im_ptr = 1;
+autorecognition =   false;
+tmp             =   load(<span class="string">'myLeNet5-example.mat'</span>);
+cnet            =   myCNN(tmp.myLeNet5);
+
+<span class="comment">% Create all the UI objects in this GUI here so that they can</span>
+<span class="comment">% be used in any functions in this GUI</span>
+hMainFigure     =   figure(<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'MenuBar'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
+                    <span class="string">'Toolbar'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[71.8 34.7 106 36.15],<span class="keyword">...</span>
+                    <span class="string">'WindowStyle'</span>, <span class="string">'normal'</span>,<span class="keyword">...</span>
+                    <span class="string">'WindowButtonDownFcn'</span>, @hMainFigureWindowButtonDownFcn,<span class="keyword">...</span>
+                    <span class="string">'WindowButtonUpFcn'</span>, @hMainFigureWindowButtonUpFcn,<span class="keyword">...</span>
+                    <span class="string">'WindowButtonMotionFcn'</span>, @hMainFigureWindowButtonMotionFcn);
+hIconEditPanel  =    uipanel(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Clipping'</span>,<span class="string">'on'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[1.8 4.3 68.2 27.77]);
+hIconEditAxes   =   axes(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hIconEditPanel,<span class="keyword">...</span>
+                    <span class="string">'vis'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[2 1.15 64 24.6]);
+hIconFileText   =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[3.8 32.9 16.2 1.46],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'MNIST file: '</span>,<span class="keyword">...</span>
+                    <span class="string">'Style'</span>,<span class="string">'text'</span>);
+hIconFileEdit   =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[19.8 32.9 78.2 1.62],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'Create a new icon or type in an icon image file for editing'</span>,<span class="keyword">...</span>
+                    <span class="string">'Enable'</span>,<span class="string">'inactive'</span>,<span class="keyword">...</span>
+                    <span class="string">'Style'</span>,<span class="string">'edit'</span>,<span class="keyword">...</span>
+                    <span class="string">'ButtondownFcn'</span>,@hIconFileEditButtondownFcn,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hIconFileEditCallback);
+hIconFileButton =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hIconFileButtonCallback,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[98 32.85 5.8 1.77],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'...'</span>,<span class="keyword">...</span>
+                    <span class="string">'TooltipString'</span>,<span class="string">'Import From Image File'</span>);
+hPreviewPanel   =   uipanel(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Title'</span>,<span class="string">'Preview'</span>,<span class="keyword">...</span>
+                    <span class="string">'Clipping'</span>,<span class="string">'on'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[71.8 19.15 32.2 13]);
+hPreviewControl =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hPreviewPanel,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Enable'</span>,<span class="string">'inactive'</span>,<span class="keyword">...</span>
+                    <span class="string">'Visible'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[2 3.77 16.2 5.46],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">''</span>);
+hPrevDigitButton =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[80 20 5 2],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'&lt;'</span>,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hPrevDigitButtonCallback);
+
+hNextDigitButton =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[91.7 20 5 2],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'&gt;'</span>,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hNextDigitButtonCallback);
+
+hAutorecognitionCheck = uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>, hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>, <span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>, [71.8 17.6 32.2 1],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'Autorecoginition'</span>,<span class="keyword">...</span>
+                    <span class="string">'Style'</span>,<span class="string">'CheckBox'</span>, <span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hAutorecognitionCheckCallback, <span class="keyword">...</span>
+                    <span class="string">'Value'</span>, 0);
+
+hResultPanel   =    uipanel(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Title'</span>,<span class="string">'Recognition result'</span>,<span class="keyword">...</span>
+                    <span class="string">'Clipping'</span>,<span class="string">'on'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[71.8 4.3 32.2 13]);
+hResultText =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hResultPanel,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'normalized'</span>,<span class="keyword">...</span>
+                    <span class="string">'Style'</span>,<span class="string">'text'</span>, <span class="keyword">...</span>
+                    <span class="string">'Enable'</span>,<span class="string">'inactive'</span>,<span class="keyword">...</span>
+                    <span class="string">'Visible'</span>,<span class="string">'on'</span>,<span class="keyword">...</span>
+                    <span class="string">'FontSize'</span>, 50, <span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[.2 .2 .6 .6],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">''</span>);
+<span class="keyword">for</span> i = 0:9,
+    hResultDigits(1+i) = uicontrol(<span class="keyword">...</span>
+        <span class="string">'Parent'</span>,hResultPanel,<span class="keyword">...</span>
+        <span class="string">'Units'</span>,<span class="string">'normalized'</span>,<span class="keyword">...</span>
+        <span class="string">'Enable'</span>,<span class="string">'inactive'</span>,<span class="keyword">...</span>
+        <span class="string">'Style'</span>,<span class="string">'text'</span>, <span class="keyword">...</span>
+        <span class="string">'FontSize'</span>, 14, <span class="keyword">...</span>
+        <span class="string">'Position'</span>,[.02+i*.095 .05 .09 .128],<span class="keyword">...</span>
+        <span class="string">'String'</span>, char(<span class="string">'0'</span>+i), <span class="keyword">...</span>
+        <span class="string">'ForegroundColor'</span>, [1 1 1]);
+<span class="keyword">end</span>
+
+hSectionLine    =   uipanel(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'HighlightColor'</span>,[0 0 0],<span class="keyword">...</span>
+                    <span class="string">'BorderType'</span>,<span class="string">'line'</span>,<span class="keyword">...</span>
+                    <span class="string">'Title'</span>,<span class="string">''</span>,<span class="keyword">...</span>
+                    <span class="string">'Clipping'</span>,<span class="string">'on'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[2 3.62 102.4 0.077]);
+hOKButton       =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[65.8 0.62 17.8 2.38],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'OK'</span>,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hOKButtonCallback);
+hCancelButton   =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[85.8 0.62 17.8 2.38],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'Cancel'</span>,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hCancelButtonCallback);
+hRecognizeButton   =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[10.0 0.62 17.8 2.38],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'Recognize'</span>,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hRecognizeButtonCallback);
+hClearButton   =   uicontrol(<span class="keyword">...</span>
+                    <span class="string">'Parent'</span>,hMainFigure,<span class="keyword">...</span>
+                    <span class="string">'Units'</span>,<span class="string">'characters'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[30.0 0.62 17.8 2.38],<span class="keyword">...</span>
+                    <span class="string">'String'</span>,<span class="string">'Clear'</span>,<span class="keyword">...</span>
+                    <span class="string">'Callback'</span>,@hClearButtonCallback);
+
+<span class="comment">% Host the ColorPalette in the PaletteContainer and keep the function</span>
+<span class="comment">% handle for getting its selected color for editing icon</span>
+
+
+<span class="comment">% Make changes needed for proper look and feel and running on different</span>
+<span class="comment">% platforms</span>
+prepareLayout(hMainFigure);
+
+<span class="comment">% Process the command line input arguments supplied when the GUI is</span>
+<span class="comment">% invoked</span>
+processUserInputs();
+
+<span class="comment">% Initialize the iconEditor using the defaults or custom data given through</span>
+<span class="comment">% property/value pairs</span>
+localUpdateIconPlot();
+
+<span class="comment">% Make the GUI on screen</span>
+set(hMainFigure,<span class="string">'visible'</span>, <span class="string">'on'</span>);
+movegui(hMainFigure,<span class="string">'onscreen'</span>);
+
+<span class="comment">% Make the GUI blocking</span>
+uiwait(hMainFigure);
+
+<span class="comment">% Return the edited icon CData if it is requested</span>
+mOutputArgs{1} =mIconCData;
+<span class="keyword">if</span> nargout&gt;0
+    [varargout{1:nargout}] = mOutputArgs{:};
+<span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hMainFigureWindowButtonDownFcn(hObject, eventdata)
+    <span class="comment">% Callback called when mouse is pressed on the figure. Used to change</span>
+    <span class="comment">% the color of the specific icon data point under the mouse to that of</span>
+    <span class="comment">% the currently selected color of the colorPalette</span>
+        <span class="keyword">if</span> (ancestor(gco,<span class="string">'axes'</span>) == hIconEditAxes)
+            mIsEditingIcon = true;
+            localEditColor();
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hMainFigureWindowButtonUpFcn(hObject, eventdata)
+    <span class="comment">% Callback called when mouse is release to exit the icon editing mode</span>
+        mIsEditingIcon = false;
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hMainFigureWindowButtonMotionFcn(hObject, eventdata)
+    <span class="comment">% Callback called when mouse is moving so that icon color data can be</span>
+    <span class="comment">% updated in the editing mode</span>
+        <span class="keyword">if</span> (ancestor(gco,<span class="string">'axes'</span>) == hIconEditAxes)
+            localEditColor();
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hIconFileEditCallback(hObject, eventdata)
+    <span class="comment">% Callback called when user has changed the icon file name from which</span>
+    <span class="comment">% the icon can be loaded</span>
+        file = get(hObject,<span class="string">'String'</span>);
+        <span class="keyword">if</span> exist(file, <span class="string">'file'</span>) ~= 2
+            errordlg([<span class="string">'The given icon file cannot be found '</span> 10, file], <span class="keyword">...</span>
+                    <span class="string">'Invalid Icon File'</span>, <span class="string">'modal'</span>);
+            set(hObject, <span class="string">'String'</span>, mMNISTFile);
+        <span class="keyword">else</span>
+            mIconCData = [];
+            localUpdateIconPlot();
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hIconFileEditButtondownFcn(hObject, eventdata)
+    <span class="comment">% Callback called the first time the user pressed mouse on the icon</span>
+    <span class="comment">% file editbox</span>
+        set(hObject,<span class="string">'String'</span>,<span class="string">''</span>);
+        set(hObject,<span class="string">'Enable'</span>,<span class="string">'on'</span>);
+        set(hObject,<span class="string">'ButtonDownFcn'</span>,[]);
+        uicontrol(hObject);
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hOKButtonCallback(hObject, eventdata)
+    <span class="comment">% Callback called when the OK button is pressed</span>
+        uiresume;
+        delete(hMainFigure);
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hCancelButtonCallback(hObject, eventdata)
+    <span class="comment">% Callback called when the Cancel button is pressed</span>
+        mIconCData =[];
+        uiresume;
+        delete(hMainFigure);
+    <span class="keyword">end</span>
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hRecognizeButtonCallback(hObject, eventdata)
+        Ip = preproc_image(mIconCData)';
+        [out cnet] = sim(cnet, Ip);
+        max_out = max(out);
+        <span class="keyword">for</span> out_i = 1:numel(out),
+            set(hResultDigits(out_i), <span class="string">'ForegroundColor'</span>, [1 1 1]*(1.8-out(out_i))/3.6)
+        <span class="keyword">end</span>
+        digit = find(out == max_out, 1) - 1;
+        <span class="keyword">if</span> ~isempty(digit),
+            set(hResultText, <span class="string">'string'</span>, char(<span class="string">'0'</span>+digit), <span class="string">'ForegroundColor'</span>, [1 1 1]*(1.8-max_out)/3.6)
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hClearButtonCallback(hObject, eventdata)
+        mIconCData = ones(mIconHeight, mIconWidth, 3);
+        localUpdateIconPlot();
+        <span class="keyword">if</span> autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hAutorecognitionCheckCallback(hObject, eventdata)
+        autorecognition = get(hAutorecognitionCheck, <span class="string">'Value'</span>);
+        <span class="keyword">if</span> autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> hIconFileButtonCallback(hObject, eventdata)
+    <span class="comment">% Callback called when the icon file selection button is pressed</span>
+        filespec = {<span class="string">'*.*'</span>, <span class="string">'Database file '</span>};
+        [filename, pathname] = uigetfile(filespec, <span class="string">'Pick an database file'</span>, mMNISTFile);
+
+        <span class="keyword">if</span> ~isequal(filename,0)
+            mMNISTFile = fullfile(pathname, filename);
+            set(hIconFileEdit, <span class="string">'ButtonDownFcn'</span>,[]);
+            set(hIconFileEdit, <span class="string">'Enable'</span>,<span class="string">'on'</span>);
+
+            mIconCData = [];
+            localUpdateIconPlot();
+
+        <span class="keyword">elseif</span> isempty(mIconCData)
+            set(hPreviewControl,<span class="string">'Visible'</span>, <span class="string">'off'</span>);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="keyword">function</span> hPrevDigitButtonCallback(hObject, eventdata)
+        <span class="keyword">if</span>(im_ptr&gt;1)
+            im_ptr=im_ptr-1;
+        <span class="keyword">end</span>
+        im = abs(double(Images{im_ptr})/255-1)';
+        mIconCData = cat(3,im,im,im);
+        localUpdateIconPlot();
+        <span class="keyword">if</span> autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="keyword">function</span> hNextDigitButtonCallback(hObject, eventdata)
+        <span class="keyword">if</span>(im_ptr&lt;numel(Images))
+            im_ptr=im_ptr+1;
+        <span class="keyword">end</span>
+        im = abs(double(Images{im_ptr})/255-1)';
+        mIconCData = cat(3,im,im,im);
+        localUpdateIconPlot();
+        <span class="keyword">if</span> autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> localEditColor
+    <span class="comment">% helper function that changes the color of an icon data point to</span>
+    <span class="comment">% that of the currently selected color in colorPalette</span>
+        <span class="keyword">if</span> mIsEditingIcon
+            pt = get(hIconEditAxes,<span class="string">'currentpoint'</span>);
+
+            x = max(1, min(ceil(pt(1,1)), mIconWidth));
+            y = max(1, min(ceil(pt(1,2)), mIconHeight));
+
+            <span class="comment">% update color of the selected block</span>
+            m = get(gcf,<span class="string">'SelectionType'</span>);
+            <span class="keyword">if</span> m(1) == <span class="string">'n'</span>, <span class="comment">% left button pressed</span>
+                mIconCData(y, x,:) = 0;
+                <span class="keyword">if</span> y&lt;mIconHeight,   mIconCData(y+1,x,:) = .8*mIconCData(y+1,x,:); <span class="keyword">end</span>
+                <span class="keyword">if</span> x&lt;mIconWidth,    mIconCData(y,x+1,:) = .8*mIconCData(y,x+1,:); <span class="keyword">end</span>
+                <span class="keyword">if</span> y&gt;1,             mIconCData(y-1,x,:) = .8*mIconCData(y-1,x,:); <span class="keyword">end</span>
+                <span class="keyword">if</span> x&gt;1,             mIconCData(y,x-1,:) = .8*mIconCData(y,x-1,:); <span class="keyword">end</span>
+            <span class="keyword">else</span>
+                mIconCData(y, x,:) = 1;
+            <span class="keyword">end</span>
+            localUpdateIconPlot();
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> localUpdateIconPlot
+    <span class="comment">% helper function that updates the iconEditor when the icon data</span>
+    <span class="comment">% changes</span>
+        <span class="comment">%initialize icon CData if it is not initialized</span>
+        <span class="keyword">if</span> isempty(mIconCData)
+            <span class="keyword">if</span> exist(mMNISTFile, <span class="string">'file'</span>) == 2
+                <span class="keyword">try</span>
+                    Images = readMNIST_image(mMNISTFile,1000);
+                    <span class="comment">%im_ptr = 1;</span>
+                    im = abs(double(Images{im_ptr})/255-1)';
+                    mIconCData = cat(3,im,im,im);
+                    set(hIconFileEdit, <span class="string">'String'</span>, mMNISTFile);
+                <span class="keyword">catch</span>
+                    errordlg([<span class="string">'Could not load MNIST database file successfully. '</span>,<span class="keyword">...</span>
+                              <span class="string">'Make sure the file name is correct: '</span> mMNISTFile],<span class="keyword">...</span>
+                              <span class="string">'Invalid MNIST File'</span>, <span class="string">'modal'</span>);
+                    mIconCData = nan(mIconHeight, mIconWidth, 3);
+                <span class="keyword">end</span>
+            <span class="keyword">else</span>
+                mIconCData = nan(mIconHeight, mIconWidth, 3);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">% update preview control</span>
+        rows = size(mIconCData, 1);
+        cols = size(mIconCData, 2);
+        previewSize = getpixelposition(hPreviewPanel);
+        <span class="comment">% compensate for the title</span>
+        previewSize(4) = previewSize(4) -15;
+        controlWidth = previewSize(3);
+        controlHeight = previewSize(4);
+        controlMargin = 6;
+        <span class="keyword">if</span> rows+controlMargin&lt;controlHeight
+            controlHeight = rows+controlMargin;
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> cols+controlMargin&lt;controlWidth
+            controlWidth = cols+controlMargin;
+        <span class="keyword">end</span>
+        setpixelposition(hPreviewControl,[(previewSize(3)-controlWidth)/2,(previewSize(4)-controlHeight)/2, controlWidth, controlHeight]);
+        set(hPreviewControl,<span class="string">'CData'</span>, mIconCData,<span class="string">'Visible'</span>,<span class="string">'on'</span>);
+
+        <span class="comment">% update icon edit pane</span>
+        set(hIconEditPanel, <span class="string">'Title'</span>,[<span class="string">'Icon Edit Pane ('</span>, num2str(rows),<span class="string">' X '</span>, num2str(cols),<span class="string">')'</span>]);
+
+        s = findobj(hIconEditPanel,<span class="string">'type'</span>,<span class="string">'surface'</span>);
+        <span class="keyword">if</span> isempty(s)
+            gridColor = get(0, <span class="string">'defaultuicontrolbackgroundcolor'</span>) - 0.2;
+            gridColor(gridColor&lt;0)=0;
+            s=surface(<span class="string">'edgecolor'</span>,gridColor,<span class="string">'parent'</span>,hIconEditAxes);
+        <span class="keyword">end</span>
+        <span class="comment">%set xdata, ydata, zdata in case the rows and/or cols change</span>
+        set(s,<span class="string">'xdata'</span>,0:cols,<span class="string">'ydata'</span>,0:rows,<span class="string">'zdata'</span>,zeros(rows+1,cols+1),<span class="string">'cdata'</span>,localGetIconCDataWithNaNs());
+
+        set(hIconEditAxes,<span class="string">'drawmode'</span>,<span class="string">'fast'</span>,<span class="string">'xlim'</span>,[-.5 cols+.5],<span class="string">'ylim'</span>,[-.5 rows+.5]);
+        axis(hIconEditAxes, <span class="string">'ij'</span>, <span class="string">'off'</span>);
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+	<span class="keyword">function</span> cdwithnan = localGetIconCDataWithNaNs()
+		<span class="comment">% Add NaN to edge of mIconCData so the entire icon renders in the</span>
+		<span class="comment">% drawing pane.  This is necessary because of surface behavior.</span>
+		cdwithnan = mIconCData;
+		cdwithnan(:,end+1,:) = NaN;
+		cdwithnan(end+1,:,:) = NaN;
+
+	<span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> processUserInputs
+    <span class="comment">% helper function that processes the input property/value pairs</span>
+        <span class="comment">% Apply possible figure and recognizable custom property/value pairs</span>
+        <span class="keyword">for</span> index=1:2:length(mInputArgs)
+            <span class="keyword">if</span> length(mInputArgs) &lt; index+1
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+            match = find(ismember({mPropertyDefs{:,1}},mInputArgs{index}));
+            <span class="keyword">if</span> ~isempty(match)
+               <span class="comment">% Validate input and assign it to a variable if given</span>
+               <span class="keyword">if</span> ~isempty(mPropertyDefs{match,3}) &amp;&amp; mPropertyDefs{match,2}(mPropertyDefs{match,1}, mInputArgs{index+1})
+                   assignin(<span class="string">'caller'</span>, mPropertyDefs{match,3}, mInputArgs{index+1})
+               <span class="keyword">end</span>
+            <span class="keyword">else</span>
+                <span class="keyword">try</span>
+                    set(topContainer, mInputArgs{index}, mInputArgs{index+1});
+                <span class="keyword">catch</span>
+                    <span class="comment">% If this is not a valid figure property value pair, keep</span>
+                    <span class="comment">% the pair and go to the next pair</span>
+                    <span class="keyword">continue</span>;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%------------------------------------------------------------------</span>
+    <span class="keyword">function</span> isValid = localValidateInput(property, value)
+    <span class="comment">% helper function that validates the user provided input property/value</span>
+    <span class="comment">% pairs. You can choose to show warnings or errors here.</span>
+        isValid = false;
+        <span class="keyword">switch</span> lower(property)
+            <span class="keyword">case</span> {<span class="string">'iconwidth'</span>, <span class="string">'iconheight'</span>}
+                <span class="keyword">if</span> isnumeric(value) &amp;&amp; value &gt;0
+                    isValid = true;
+                <span class="keyword">end</span>
+            <span class="keyword">case</span> <span class="string">'MNISTfile'</span>
+                <span class="keyword">if</span> exist(value,<span class="string">'file'</span>)==2
+                    isValid = true;
+                <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span> <span class="comment">% end of iconEditor</span>
+
+<span class="comment">%------------------------------------------------------------------</span>
+<span class="keyword">function</span> prepareLayout(topContainer)
+<span class="comment">% This is a utility function that takes care of issues related to</span>
+<span class="comment">% look&amp;feel and running across multiple platforms. You can reuse</span>
+<span class="comment">% this function in other GUIs or modify it to fit your needs.</span>
+    allObjects = findall(topContainer);
+    warning <span class="string">off</span>  <span class="comment">%Temporary presentation fix</span>
+    <span class="keyword">try</span>
+        titles=get(allObjects(isprop(allObjects,<span class="string">'TitleHandle'</span>)), <span class="string">'TitleHandle'</span>);
+        allObjects(ismember(allObjects,[titles{:}])) = [];
+    <span class="keyword">catch</span>
+    <span class="keyword">end</span>
+    warning <span class="string">on</span>
+
+    <span class="comment">% Use the name of this GUI file as the title of the figure</span>
+    defaultColor = get(0, <span class="string">'defaultuicontrolbackgroundcolor'</span>);
+    <span class="keyword">if</span> isa(handle(topContainer),<span class="string">'figure'</span>)
+        set(topContainer,<span class="string">'Name'</span>, mfilename, <span class="string">'NumberTitle'</span>,<span class="string">'off'</span>);
+        <span class="comment">% Make figure color matches that of GUI objects</span>
+        set(topContainer, <span class="string">'Color'</span>,defaultColor);
+    <span class="keyword">end</span>
+
+    <span class="comment">% Make GUI objects available to callbacks so that they cannot</span>
+    <span class="comment">% be changes accidentally by other MATLAB commands</span>
+    set(allObjects(isprop(allObjects,<span class="string">'HandleVisibility'</span>)), <span class="string">'HandleVisibility'</span>, <span class="string">'Callback'</span>);
+
+    <span class="comment">% Make the GUI run properly across multiple platforms by using</span>
+    <span class="comment">% the proper units</span>
+    <span class="keyword">if</span> strcmpi(get(topContainer, <span class="string">'Resize'</span>),<span class="string">'on'</span>)
+        set(allObjects(isprop(allObjects,<span class="string">'Units'</span>)),<span class="string">'Units'</span>,<span class="string">'Normalized'</span>);
+    <span class="keyword">else</span>
+        set(allObjects(isprop(allObjects,<span class="string">'Units'</span>)),<span class="string">'Units'</span>,<span class="string">'Characters'</span>);
+    <span class="keyword">end</span>
+
+    <span class="comment">% You may want to change the default color of editbox,</span>
+    <span class="comment">% popupmenu, and listbox to white on Windows</span>
+    <span class="keyword">if</span> ispc
+        candidates = [findobj(allObjects, <span class="string">'Style'</span>,<span class="string">'Popupmenu'</span>),<span class="keyword">...</span>
+                           findobj(allObjects, <span class="string">'Style'</span>,<span class="string">'Edit'</span>),<span class="keyword">...</span>
+                           findobj(allObjects, <span class="string">'Style'</span>,<span class="string">'Listbox'</span>)];
+        set(findobj(candidates,<span class="string">'BackgroundColor'</span>, defaultColor), <span class="string">'BackgroundColor'</span>,<span class="string">'white'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">function</span> out = preproc_image(id)
+    <span class="comment">%Preprocess single image</span>
+    Inorm = id(:,:,1);
+    Inorm(~isfinite(Inorm)) = 1;
+    Inorm = abs(Inorm-1)';
+    out = zeros(32);
+    out(3:30,3:30) = Inorm;
+    <span class="keyword">if</span> sum(out(:))&gt;0,
+        out = reshape(mapstd(out(:)'), 32, 32);
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+<span class="keyword">function</span> I = readMNIST_image(filepath,num)
+    <span class="comment">%readMNIST_image MNIST handwriten image database reading. Reads only images</span>
+    <span class="comment">%without labels, with specified filename</span>
+    <span class="comment">%</span>
+    <span class="comment">%  Syntax</span>
+    <span class="comment">%</span>
+    <span class="comment">%    I = readMNIST_image(filepath,num)</span>
+    <span class="comment">%</span>
+    <span class="comment">%  Description</span>
+    <span class="comment">%   Input:</span>
+    <span class="comment">%    filepath - name of database file with path</span>
+    <span class="comment">%    n - number of images to process</span>
+    <span class="comment">%   Output:</span>
+    <span class="comment">%    I - cell array of training images 28x28 size</span>
+    <span class="comment">%</span>
+    <span class="comment">%(c) Sirotenko Mikhail, 2009</span>
+    <span class="comment">%===========Loading training set</span>
+
+    fid = fopen(filepath,<span class="string">'r'</span>,<span class="string">'b'</span>);  <span class="comment">%big-endian</span>
+    magicNum = fread(fid,1,<span class="string">'int32'</span>);    <span class="comment">%Magic number</span>
+    <span class="keyword">if</span>(magicNum~=2051)
+        display(<span class="string">'Error: cant find magic number'</span>);
+        <span class="keyword">return</span>;
+    <span class="keyword">end</span>
+    imgNum = fread(fid,1,<span class="string">'int32'</span>);  <span class="comment">%Number of images</span>
+    rowSz = fread(fid,1,<span class="string">'int32'</span>);   <span class="comment">%Image height</span>
+    colSz = fread(fid,1,<span class="string">'int32'</span>);   <span class="comment">%Image width</span>
+
+    <span class="keyword">if</span>(num&lt;imgNum)
+        imgNum=num;
+    <span class="keyword">end</span>
+
+    <span class="keyword">for</span> k=1:imgNum
+        I{k} = uint8(fread(fid,[rowSz colSz],<span class="string">'uchar'</span>));
+    <span class="keyword">end</span>
+    fclose(fid);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Adding layer 1 [input] to myCNN object [net]: done.
+myCNN object [CNN] has been successfully created.
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function varargout = demo_myCNN(varargin)
+% A GUI-demo for myCNN character recogniton example.
+%
+% DEMO_MYCNN neede the original MNIST dataset, which can be found on
+% Yann LeCun's web-site: http://yann.lecun.com/exdb/mnist/index.html
+% It is more convenient to put MNIST data files (t10k-images-idx3-ubyte,
+% t10k-labels-idx1-ubyte, train-images-idx3-ubyte and train-labels-idx1-ubyte)
+% into CNN/MNIST folder, so demo could automatically find them.
+% 
+% DEMO_MYCNN code is based on CNN_TOOL developed by Mikhail Sitotenko
+% see http://www.mathworks.com/matlabcentral/fileexchange/24291
+%
+% Last update: 2009-09-30
+
+
+mInputArgs      =   varargin;   % Command line arguments when invoking the GUI
+mOutputArgs     =   {};         % Variable for storing output when GUI returns
+mIconCData      =   [];         % The icon CData edited by this GUI of dimension
+                                % [mIconHeight, mIconWidth, 3]
+mIsEditingIcon  =   false;      % Flag for indicating whether the current mouse 
+                                % move is used for editing color or not
+% Variables for supporting custom property/value pairs
+mPropertyDefs   =   {...        % The supported custom property/value pairs of this GUI
+                     'iconwidth',   @localValidateInput, 'mIconWidth';
+                     'iconheight',  @localValidateInput, 'mIconHeight';
+                     'MNISTfile',   @localValidateInput, 'mMNISTFile'};
+mIconWidth      =   28;         % Use input property 'iconwidth' to initialize
+mIconHeight     =   28;         % Use input property 'iconheight' to initialize
+mMNISTFile      =   './MNIST/t10k-images-idx3-ubyte'; %fullfile(matlabroot,'./'); 
+Images = {0};
+im_ptr = 1;
+autorecognition =   false;
+tmp             =   load('myLeNet5-example.mat');
+cnet            =   myCNN(tmp.myLeNet5);
+
+% Create all the UI objects in this GUI here so that they can
+% be used in any functions in this GUI
+hMainFigure     =   figure(...
+                    'Units','characters',...
+                    'MenuBar','none',...
+                    'Toolbar','none',...
+                    'Position',[71.8 34.7 106 36.15],...
+                    'WindowStyle', 'normal',...
+                    'WindowButtonDownFcn', @hMainFigureWindowButtonDownFcn,...
+                    'WindowButtonUpFcn', @hMainFigureWindowButtonUpFcn,...
+                    'WindowButtonMotionFcn', @hMainFigureWindowButtonMotionFcn);
+hIconEditPanel  =    uipanel(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Clipping','on',...
+                    'Position',[1.8 4.3 68.2 27.77]);
+hIconEditAxes   =   axes(...
+                    'Parent',hIconEditPanel,...
+                    'vis','off',...
+                    'Units','characters',...
+                    'Position',[2 1.15 64 24.6]);
+hIconFileText   =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'HorizontalAlignment','left',...
+                    'Position',[3.8 32.9 16.2 1.46],...
+                    'String','MNIST file: ',...
+                    'Style','text');
+hIconFileEdit   =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'HorizontalAlignment','left',...
+                    'Position',[19.8 32.9 78.2 1.62],...
+                    'String','Create a new icon or type in an icon image file for editing',...
+                    'Enable','inactive',...
+                    'Style','edit',...
+                    'ButtondownFcn',@hIconFileEditButtondownFcn,...
+                    'Callback',@hIconFileEditCallback);
+hIconFileButton =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Callback',@hIconFileButtonCallback,...
+                    'Position',[98 32.85 5.8 1.77],...
+                    'String','...',...
+                    'TooltipString','Import From Image File');
+hPreviewPanel   =   uipanel(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Title','Preview',...
+                    'Clipping','on',...
+                    'Position',[71.8 19.15 32.2 13]);
+hPreviewControl =   uicontrol(...
+                    'Parent',hPreviewPanel,...
+                    'Units','characters',...
+                    'Enable','inactive',...
+                    'Visible','off',...
+                    'Position',[2 3.77 16.2 5.46],...
+                    'String','');
+hPrevDigitButton =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Position',[80 20 5 2],...
+                    'String','<',...
+                    'Callback',@hPrevDigitButtonCallback);
+
+hNextDigitButton =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Position',[91.7 20 5 2],...
+                    'String','>',...
+                    'Callback',@hNextDigitButtonCallback);
+
+hAutorecognitionCheck = uicontrol(...
+                    'Parent', hMainFigure,...
+                    'Units', 'characters',...
+                    'HorizontalAlignment', 'left',...
+                    'Position', [71.8 17.6 32.2 1],...
+                    'String','Autorecoginition',...
+                    'Style','CheckBox', ...
+                    'Callback',@hAutorecognitionCheckCallback, ...
+                    'Value', 0);
+                
+hResultPanel   =    uipanel(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Title','Recognition result',...
+                    'Clipping','on',...
+                    'Position',[71.8 4.3 32.2 13]);
+hResultText =   uicontrol(...
+                    'Parent',hResultPanel,...
+                    'Units','normalized',...
+                    'Style','text', ...
+                    'Enable','inactive',...
+                    'Visible','on',...
+                    'FontSize', 50, ...
+                    'Position',[.2 .2 .6 .6],...
+                    'String','');
+for i = 0:9,
+    hResultDigits(1+i) = uicontrol(...
+        'Parent',hResultPanel,...
+        'Units','normalized',...
+        'Enable','inactive',...
+        'Style','text', ...
+        'FontSize', 14, ...
+        'Position',[.02+i*.095 .05 .09 .128],...
+        'String', char('0'+i), ...
+        'ForegroundColor', [1 1 1]);
+end
+                
+hSectionLine    =   uipanel(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'HighlightColor',[0 0 0],...
+                    'BorderType','line',...
+                    'Title','',...
+                    'Clipping','on',...
+                    'Position',[2 3.62 102.4 0.077]);
+hOKButton       =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Position',[65.8 0.62 17.8 2.38],...
+                    'String','OK',...
+                    'Callback',@hOKButtonCallback);
+hCancelButton   =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Position',[85.8 0.62 17.8 2.38],...
+                    'String','Cancel',...
+                    'Callback',@hCancelButtonCallback);
+hRecognizeButton   =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Position',[10.0 0.62 17.8 2.38],...
+                    'String','Recognize',...
+                    'Callback',@hRecognizeButtonCallback);
+hClearButton   =   uicontrol(...
+                    'Parent',hMainFigure,...
+                    'Units','characters',...
+                    'Position',[30.0 0.62 17.8 2.38],...
+                    'String','Clear',...
+                    'Callback',@hClearButtonCallback);
+                
+% Host the ColorPalette in the PaletteContainer and keep the function
+% handle for getting its selected color for editing icon
+
+
+% Make changes needed for proper look and feel and running on different
+% platforms 
+prepareLayout(hMainFigure);                            
+
+% Process the command line input arguments supplied when the GUI is
+% invoked 
+processUserInputs();                            
+
+% Initialize the iconEditor using the defaults or custom data given through
+% property/value pairs
+localUpdateIconPlot();
+
+% Make the GUI on screen
+set(hMainFigure,'visible', 'on');
+movegui(hMainFigure,'onscreen');
+
+% Make the GUI blocking
+uiwait(hMainFigure);
+
+% Return the edited icon CData if it is requested
+mOutputArgs{1} =mIconCData;
+if nargout>0
+    [varargout{1:nargout}] = mOutputArgs{:};
+end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hMainFigureWindowButtonDownFcn(hObject, eventdata)
+    % Callback called when mouse is pressed on the figure. Used to change
+    % the color of the specific icon data point under the mouse to that of
+    % the currently selected color of the colorPalette
+        if (ancestor(gco,'axes') == hIconEditAxes)
+            mIsEditingIcon = true;
+            localEditColor();
+        end
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hMainFigureWindowButtonUpFcn(hObject, eventdata)
+    % Callback called when mouse is release to exit the icon editing mode
+        mIsEditingIcon = false;
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hMainFigureWindowButtonMotionFcn(hObject, eventdata)
+    % Callback called when mouse is moving so that icon color data can be
+    % updated in the editing mode
+        if (ancestor(gco,'axes') == hIconEditAxes)
+            localEditColor();
+        end
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hIconFileEditCallback(hObject, eventdata)
+    % Callback called when user has changed the icon file name from which
+    % the icon can be loaded
+        file = get(hObject,'String');
+        if exist(file, 'file') ~= 2
+            errordlg(['The given icon file cannot be found ' 10, file], ...
+                    'Invalid Icon File', 'modal');
+            set(hObject, 'String', mMNISTFile);
+        else
+            mIconCData = [];
+            localUpdateIconPlot();            
+        end
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hIconFileEditButtondownFcn(hObject, eventdata)
+    % Callback called the first time the user pressed mouse on the icon
+    % file editbox 
+        set(hObject,'String','');
+        set(hObject,'Enable','on');
+        set(hObject,'ButtonDownFcn',[]);        
+        uicontrol(hObject);
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hOKButtonCallback(hObject, eventdata)
+    % Callback called when the OK button is pressed
+        uiresume;
+        delete(hMainFigure);
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hCancelButtonCallback(hObject, eventdata)
+    % Callback called when the Cancel button is pressed
+        mIconCData =[];
+        uiresume;
+        delete(hMainFigure);
+    end
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hRecognizeButtonCallback(hObject, eventdata)
+        Ip = preproc_image(mIconCData)';
+        [out cnet] = sim(cnet, Ip);
+        max_out = max(out);
+        for out_i = 1:numel(out),
+            set(hResultDigits(out_i), 'ForegroundColor', [1 1 1]*(1.8-out(out_i))/3.6)
+        end
+        digit = find(out == max_out, 1) - 1;
+        if ~isempty(digit),
+            set(hResultText, 'string', char('0'+digit), 'ForegroundColor', [1 1 1]*(1.8-max_out)/3.6)
+        end
+        
+    end
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hClearButtonCallback(hObject, eventdata)
+        mIconCData = ones(mIconHeight, mIconWidth, 3);
+        localUpdateIconPlot();
+        if autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        end
+    end
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hAutorecognitionCheckCallback(hObject, eventdata)
+        autorecognition = get(hAutorecognitionCheck, 'Value');
+        if autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        end
+
+    end
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function hIconFileButtonCallback(hObject, eventdata)
+    % Callback called when the icon file selection button is pressed
+        filespec = {'*.*', 'Database file '};
+        [filename, pathname] = uigetfile(filespec, 'Pick an database file', mMNISTFile);
+
+        if ~isequal(filename,0)
+            mMNISTFile = fullfile(pathname, filename);             
+            set(hIconFileEdit, 'ButtonDownFcn',[]);            
+            set(hIconFileEdit, 'Enable','on');            
+            
+            mIconCData = [];
+            localUpdateIconPlot();            
+            
+        elseif isempty(mIconCData)
+            set(hPreviewControl,'Visible', 'off');            
+        end
+    end
+
+    function hPrevDigitButtonCallback(hObject, eventdata)
+        if(im_ptr>1)
+            im_ptr=im_ptr-1;
+        end
+        im = abs(double(Images{im_ptr})/255-1)';
+        mIconCData = cat(3,im,im,im);   
+        localUpdateIconPlot();
+        if autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        end        
+    end
+
+    function hNextDigitButtonCallback(hObject, eventdata)
+        if(im_ptr<numel(Images))
+            im_ptr=im_ptr+1;
+        end
+        im = abs(double(Images{im_ptr})/255-1)';
+        mIconCData = cat(3,im,im,im);    
+        localUpdateIconPlot();
+        if autorecognition,
+            hRecognizeButtonCallback(hObject, eventdata)
+        end
+    end
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function localEditColor
+    % helper function that changes the color of an icon data point to
+    % that of the currently selected color in colorPalette 
+        if mIsEditingIcon
+            pt = get(hIconEditAxes,'currentpoint');
+
+            x = max(1, min(ceil(pt(1,1)), mIconWidth));
+            y = max(1, min(ceil(pt(1,2)), mIconHeight));
+
+            % update color of the selected block
+            m = get(gcf,'SelectionType');
+            if m(1) == 'n', % left button pressed
+                mIconCData(y, x,:) = 0;
+                if y<mIconHeight,   mIconCData(y+1,x,:) = .8*mIconCData(y+1,x,:); end
+                if x<mIconWidth,    mIconCData(y,x+1,:) = .8*mIconCData(y,x+1,:); end
+                if y>1,             mIconCData(y-1,x,:) = .8*mIconCData(y-1,x,:); end
+                if x>1,             mIconCData(y,x-1,:) = .8*mIconCData(y,x-1,:); end
+            else
+                mIconCData(y, x,:) = 1;
+            end
+            localUpdateIconPlot();
+        end
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function localUpdateIconPlot   
+    % helper function that updates the iconEditor when the icon data
+    % changes
+        %initialize icon CData if it is not initialized
+        if isempty(mIconCData)
+            if exist(mMNISTFile, 'file') == 2
+                try
+                    Images = readMNIST_image(mMNISTFile,1000);
+                    %im_ptr = 1;
+                    im = abs(double(Images{im_ptr})/255-1)';
+                    mIconCData = cat(3,im,im,im);
+                    set(hIconFileEdit, 'String', mMNISTFile);            
+                catch
+                    errordlg(['Could not load MNIST database file successfully. ',...
+                              'Make sure the file name is correct: ' mMNISTFile],...
+                              'Invalid MNIST File', 'modal');
+                    mIconCData = nan(mIconHeight, mIconWidth, 3);
+                end
+            else 
+                mIconCData = nan(mIconHeight, mIconWidth, 3);
+            end
+        end
+        
+        % update preview control
+        rows = size(mIconCData, 1);
+        cols = size(mIconCData, 2);
+        previewSize = getpixelposition(hPreviewPanel);
+        % compensate for the title
+        previewSize(4) = previewSize(4) -15;
+        controlWidth = previewSize(3);
+        controlHeight = previewSize(4);  
+        controlMargin = 6;
+        if rows+controlMargin<controlHeight
+            controlHeight = rows+controlMargin;
+        end
+        if cols+controlMargin<controlWidth
+            controlWidth = cols+controlMargin;
+        end        
+        setpixelposition(hPreviewControl,[(previewSize(3)-controlWidth)/2,(previewSize(4)-controlHeight)/2, controlWidth, controlHeight]); 
+        set(hPreviewControl,'CData', mIconCData,'Visible','on');
+        
+        % update icon edit pane
+        set(hIconEditPanel, 'Title',['Icon Edit Pane (', num2str(rows),' X ', num2str(cols),')']);
+        
+        s = findobj(hIconEditPanel,'type','surface');        
+        if isempty(s)
+            gridColor = get(0, 'defaultuicontrolbackgroundcolor') - 0.2;
+            gridColor(gridColor<0)=0;
+            s=surface('edgecolor',gridColor,'parent',hIconEditAxes);
+        end        
+        %set xdata, ydata, zdata in case the rows and/or cols change
+        set(s,'xdata',0:cols,'ydata',0:rows,'zdata',zeros(rows+1,cols+1),'cdata',localGetIconCDataWithNaNs());
+
+        set(hIconEditAxes,'drawmode','fast','xlim',[-.5 cols+.5],'ylim',[-.5 rows+.5]);
+        axis(hIconEditAxes, 'ij', 'off');        
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+	function cdwithnan = localGetIconCDataWithNaNs()
+		% Add NaN to edge of mIconCData so the entire icon renders in the
+		% drawing pane.  This is necessary because of surface behavior.
+		cdwithnan = mIconCData;
+		cdwithnan(:,end+1,:) = NaN;
+		cdwithnan(end+1,:,:) = NaN;
+		
+	end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function processUserInputs
+    % helper function that processes the input property/value pairs 
+        % Apply possible figure and recognizable custom property/value pairs
+        for index=1:2:length(mInputArgs)
+            if length(mInputArgs) < index+1
+                break;
+            end
+            match = find(ismember({mPropertyDefs{:,1}},mInputArgs{index}));
+            if ~isempty(match)  
+               % Validate input and assign it to a variable if given
+               if ~isempty(mPropertyDefs{match,3}) && mPropertyDefs{match,2}(mPropertyDefs{match,1}, mInputArgs{index+1})
+                   assignin('caller', mPropertyDefs{match,3}, mInputArgs{index+1}) 
+               end
+            else
+                try 
+                    set(topContainer, mInputArgs{index}, mInputArgs{index+1});
+                catch
+                    % If this is not a valid figure property value pair, keep
+                    % the pair and go to the next pair
+                    continue;
+                end
+            end
+        end        
+    end
+
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    function isValid = localValidateInput(property, value)
+    % helper function that validates the user provided input property/value
+    % pairs. You can choose to show warnings or errors here.
+        isValid = false;
+        switch lower(property)
+            case {'iconwidth', 'iconheight'}
+                if isnumeric(value) && value >0
+                    isValid = true;
+                end
+            case 'MNISTfile'
+                if exist(value,'file')==2
+                    isValid = true;                    
+                end
+        end
+    end
+end % end of iconEditor
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+function prepareLayout(topContainer)
+% This is a utility function that takes care of issues related to
+% look&feel and running across multiple platforms. You can reuse
+% this function in other GUIs or modify it to fit your needs.
+    allObjects = findall(topContainer);
+    warning off  %Temporary presentation fix
+    try
+        titles=get(allObjects(isprop(allObjects,'TitleHandle')), 'TitleHandle');
+        allObjects(ismember(allObjects,[titles{:}])) = [];
+    catch
+    end
+    warning on
+
+    % Use the name of this GUI file as the title of the figure
+    defaultColor = get(0, 'defaultuicontrolbackgroundcolor');
+    if isa(handle(topContainer),'figure')
+        set(topContainer,'Name', mfilename, 'NumberTitle','off');
+        % Make figure color matches that of GUI objects
+        set(topContainer, 'Color',defaultColor);
+    end
+
+    % Make GUI objects available to callbacks so that they cannot
+    % be changes accidentally by other MATLAB commands
+    set(allObjects(isprop(allObjects,'HandleVisibility')), 'HandleVisibility', 'Callback');
+
+    % Make the GUI run properly across multiple platforms by using
+    % the proper units
+    if strcmpi(get(topContainer, 'Resize'),'on')
+        set(allObjects(isprop(allObjects,'Units')),'Units','Normalized');
+    else
+        set(allObjects(isprop(allObjects,'Units')),'Units','Characters');
+    end
+
+    % You may want to change the default color of editbox,
+    % popupmenu, and listbox to white on Windows 
+    if ispc
+        candidates = [findobj(allObjects, 'Style','Popupmenu'),...
+                           findobj(allObjects, 'Style','Edit'),...
+                           findobj(allObjects, 'Style','Listbox')];
+        set(findobj(candidates,'BackgroundColor', defaultColor), 'BackgroundColor','white');
+    end
+end
+function out = preproc_image(id)
+    %Preprocess single image
+    Inorm = id(:,:,1);
+    Inorm(~isfinite(Inorm)) = 1;
+    Inorm = abs(Inorm-1)';
+    out = zeros(32);
+    out(3:30,3:30) = Inorm;
+    if sum(out(:))>0,
+        out = reshape(mapstd(out(:)'), 32, 32);
+    end
+    
+end
+function I = readMNIST_image(filepath,num)
+    %readMNIST_image MNIST handwriten image database reading. Reads only images
+    %without labels, with specified filename
+    %
+    %  Syntax
+    %  
+    %    I = readMNIST_image(filepath,num)
+    %    
+    %  Description
+    %   Input:
+    %    filepath - name of database file with path
+    %    n - number of images to process
+    %   Output:
+    %    I - cell array of training images 28x28 size
+    %
+    %(c) Sirotenko Mikhail, 2009
+    %===========Loading training set
+
+    fid = fopen(filepath,'r','b');  %big-endian
+    magicNum = fread(fid,1,'int32');    %Magic number
+    if(magicNum~=2051) 
+        display('Error: cant find magic number');
+        return;
+    end
+    imgNum = fread(fid,1,'int32');  %Number of images
+    rowSz = fread(fid,1,'int32');   %Image height
+    colSz = fread(fid,1,'int32');   %Image width
+
+    if(num<imgNum) 
+        imgNum=num; 
+    end
+
+    for k=1:imgNum
+        I{k} = uint8(fread(fid,[rowSz colSz],'uchar'));
+    end
+    fclose(fid);
+end
+
+##### SOURCE END #####
+--></body></html>
