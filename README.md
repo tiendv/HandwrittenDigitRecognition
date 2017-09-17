@@ -12,5 +12,6 @@ Trong đó các phương thức sử dụng được modified từ source của 
 
 Chương trình bao gồm có training và testing. 
 
+Link video demo: https://www.youtube.com/watch?v=CU6CQ3ZMZSs
 Yêu cầu: chạy trên bản Matlab 2017
 
